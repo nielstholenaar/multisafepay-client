@@ -1,0 +1,30 @@
+{
+    "name": "ntholenaar/multisafepay-client",
+    "type": "library",
+    "description": "MultiSafepay payment processing library",
+    "keywords": [
+        "multisafepay",
+        "client"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Niels Tholenaar",
+            "email": "info@123quality.nl",
+            "homepage": "http://123quality.nl"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Ntholenaar\\MultiSafepayClient\\" : "src/"
+        }
+    },
+    "require": {
+        "php-http/message": "^1.0",
+        "php-http/client-implementation": "^1.0",
+        "php-http/discovery": "^1.0"
+    },
+    "require-dev": {
+      "php-http/guzzle6-adapter": "^1.1.1"
+    }
+}
