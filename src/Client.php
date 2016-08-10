@@ -1,35 +1,14 @@
 <?php namespace Ntholenaar\MultiSafepayClient;
 
 use Http\Client\HttpClient;
-use Http\Discovery\HttpClientDiscovery;
-use Http\Discovery\MessageFactoryDiscovery;
-use Http\Message\MessageFactory;
-use Ntholenaar\MultiSafepayClient\Requests\ListGatewaysRequest;
-use Ntholenaar\MultiSafepayClient\Requests\RequestInterface;
+use Ntholenaar\MultiSafepayClient\Request\FetchGatewayRequest;
+use Ntholenaar\MultiSafepayClient\Request\FetchOrderRequest;
+use Ntholenaar\MultiSafepayClient\Request\ListGatewaysRequest;
+use Ntholenaar\MultiSafepayClient\Request\ListIssuersRequest;
+use Ntholenaar\MultiSafepayClient\Request\RequestInterface;
 
-class Client
+class Client implements ClientInterface
 {
-    /**
-     * The endpoint of the test API.
-     *
-     * @var string
-     */
-    protected $testApiEndpoint = 'https://testapi.multisafepay.com/v1/json/';
-
-    /**
-     * The endpoint of the live API.
-     *
-     * @var string
-     */
-    protected $liveApiEndpoint = 'https://api.multisafepay.com/v1/json/';
-
-    /**
-     * The API key which will be used for authentication.
-     *
-     * @var string
-     */
-    protected $apiKey;
-
     /**
      * Optional ISO 639-1 language code.
      *
@@ -42,8 +21,6 @@ class Client
     protected $locale;
 
     /**
-     * Indicates if the test mode is enabled.
-     *
      * @var bool
      */
     protected $testMode = false;
@@ -54,39 +31,11 @@ class Client
     protected $httpClient;
 
     /**
-     * @var MessageFactory
+     * @param HttpClient $httpClient Client to do HTTP requests.
      */
-    protected $messageFactory;
-
-    /**
-     * Client constructor.
-     *
-     * @param HttpClient|null $httpClient
-     * @param MessageFactory|null $messageFactory
-     */
-    public function __construct(HttpClient $httpClient = null, MessageFactory $messageFactory = null)
+    public function __construct(HttpClient $httpClient)
     {
-        $this->httpClient = $httpClient ?: HttpClientDiscovery::find();
-
-        $this->messageFactory = $messageFactory ?: MessageFactoryDiscovery::find();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getApiKey()
-    {
-        return $this->apiKey;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setApiKey($apiKey)
-    {
-        $this->apiKey = $apiKey;
-
-        return $this;
+        $this->httpClient = $httpClient;
     }
 
     /**
@@ -110,14 +59,6 @@ class Client
     /**
      * {@inheritdoc}
      */
-    public function getTestMode()
-    {
-        return $this->testMode;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function setTestMode($testMode)
     {
         $this->testMode = $testMode;
@@ -126,31 +67,74 @@ class Client
     }
 
     /**
+     * Get the environment.
+     *
+     * @return string
+     */
+    public function getEnvironment()
+    {
+        return $this->testMode ? 'test' : 'live';
+    }
+
+    /**
+     * Parse the parameters.
+     *
+     * @param array $parameters
+     * @return array
+     */
+    protected function compileParameters(array $parameters)
+    {
+        $locale = $this->getLocale();
+
+        if ($locale) {
+            $parameters = array_merge(compact('locale'), $parameters);
+        }
+
+        return $parameters;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function createListGatewaysRequest(array $parameters = array())
     {
-        return new ListGatewaysRequest($parameters);
+        return new ListGatewaysRequest(
+            $this->getEnvironment(),
+            $this->compileParameters($parameters)
+        );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function createOrderRequest(array $parameters)
+    public function createFetchGatewayRequest(array $parameters = array())
     {
-        //
+        return new FetchGatewayRequest(
+            $this->getEnvironment(),
+            $this->compileParameters($parameters)
+        );
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function getApiEndpoint()
+    public function createListIssuersRequest(array $parameters = array())
     {
-        if ($this->testMode) {
-            return $this->testApiEndpoint;
-        }
+        return new ListIssuersRequest(
+            $this->getEnvironment(),
+            $this->compileParameters($parameters)
+        );
+    }
 
-        return $this->liveApiEndpoint;
+    /**
+     * {@inheritdoc}
+     */
+    public function createFetchOrderRequest(array $parameters = array())
+    {
+        return new FetchOrderRequest(
+            $this->getEnvironment(),
+            $this->compileParameters($parameters)
+        );
     }
 
     /**
@@ -158,17 +142,19 @@ class Client
      */
     public function executeRequest(RequestInterface $request)
     {
-        $request = $request->compileRequest();
-
-        $httpRequest = $this->messageFactory->createRequest(
-            $request['method'],
-            $this->getApiEndpoint() . $request['url'],
-            ['api_key' => $this->getApiKey()],
-            $request['body']
+        $response = $this->httpClient->sendRequest(
+            $request->compileHttpRequest()
         );
 
-        $response = $this->httpClient->sendRequest($httpRequest);
+        // Convert the PSR ResponseInterface.
+        $body = $response->getBody()->getContents();
 
-        return $response->getBody();
+        $data = json_decode($body);
+
+        if (property_exists($data, 'success') && $data->success !== true) {
+            throw new \Exception($data->error_info, $data->error_code);
+        }
+
+        return $data->data;
     }
 }

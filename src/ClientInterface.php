@@ -1,25 +1,10 @@
 <?php namespace Ntholenaar\MultiSafepayClient;
 
-use Ntholenaar\MultiSafepayClient\Requests\RequestInterface;
-use Psr\Http\Message\StreamInterface;
+use Ntholenaar\MultiSafepayClient\Request\ListGatewaysRequest;
+use Ntholenaar\MultiSafepayClient\Request\RequestInterface;
 
 interface ClientInterface
 {
-    /**
-     * Get the API key.
-     *
-     * @return string
-     */
-    public function getApiKey();
-
-    /**
-     * Set the API key.
-     *
-     * @param $apiKey
-     * @return $this
-     */
-    public function setApiKey($apiKey);
-
     /**
      * Get the locale.
      *
@@ -30,20 +15,20 @@ interface ClientInterface
     /**
      * Set the locale.
      *
-     * @param $locale
+     * @param string $locale
      * @return $this
      */
     public function setLocale($locale);
 
     /**
-     * Indicates if the test mode is active.
+     * Get the environment.
      *
-     * @return bool
+     * @return string
      */
-    public function getTestMode();
+    public function getEnvironment();
 
     /**
-     * Enable / disable the test mode.
+     * Enable or disable the test mode.
      *
      * @param $testMode
      * @return $this
@@ -51,27 +36,19 @@ interface ClientInterface
     public function setTestMode($testMode);
 
     /**
-     * Retrieve all the available payment gateways.
+     * Create the list gateways request.
      *
      * @param array $parameters
-     * @return RequestInterface
+     * @return ListGatewaysRequest
      */
     public function createListGatewaysRequest(array $parameters = array());
-
-    /**
-     * Create an order request.
-     *
-     * @param array $parameters
-     * @return RequestInterface
-     */
-    public function createOrderRequest(array $parameters);
-
 
     /**
      * Execute the request.
      *
      * @param RequestInterface $request
-     * @return StreamInterface
+     * @return array|object
+     * @throws \Exception
      */
     public function executeRequest(RequestInterface $request);
 }

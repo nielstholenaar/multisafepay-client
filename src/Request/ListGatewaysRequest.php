@@ -1,20 +1,11 @@
-<?php namespace Ntholenaar\MultiSafepayClient\Requests;
-
-use Ntholenaar\MultiSafepayClient\AbstractRequest;
+<?php namespace Ntholenaar\MultiSafepayClient\Request;
 
 class ListGatewaysRequest extends AbstractRequest implements RequestInterface
 {
     /**
-     * ListGatewaysRequest constructor.
-     *
-     * @param array $parameters
+     * {@inheritdoc}
      */
-    public function __construct(array $parameters = array())
-    {
-       if (count($parameters) > 0) {
-            $this->parseParameters($parameters);
-        }
-    }
+    protected $path = 'gateways';
 
     /**
      * Get the country.
@@ -88,16 +79,8 @@ class ListGatewaysRequest extends AbstractRequest implements RequestInterface
     /**
      * {@inheritdoc}
      */
-    protected function validateParameters()
+    public function validate()
     {
         return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getUrl()
-    {
-        return 'gateways?' . http_build_query($this->queryParameters);
     }
 }

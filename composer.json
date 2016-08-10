@@ -22,9 +22,12 @@
     "require": {
         "php-http/message": "^1.0",
         "php-http/client-implementation": "^1.0",
-        "php-http/discovery": "^1.0"
+        "php-http/discovery": "^1.0",
+        "php-http/client-common": "^1.2"
     },
     "require-dev": {
-      "php-http/guzzle6-adapter": "^1.1.1"
+        "php-http/guzzle6-adapter": "^1.1.1",
+        "squizlabs/php_codesniffer": "2.*",
+        "phpunit/phpunit": "^5.5"
     }
 }
