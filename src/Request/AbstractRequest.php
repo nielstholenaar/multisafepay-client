@@ -69,7 +69,7 @@ abstract class AbstractRequest implements RequestInterface
     ) {
         $this->parseParameters($parameters);
 
-        if (! $messageFactory) {
+        if (!$messageFactory) {
             $messageFactory = MessageFactoryDiscovery::find();
         }
 
@@ -154,7 +154,7 @@ abstract class AbstractRequest implements RequestInterface
      */
     protected function getQueryParameter($key)
     {
-        if (! array_key_exists($key, $this->queryParameters)) {
+        if (!array_key_exists($key, $this->queryParameters)) {
             return null;
         }
 
@@ -219,7 +219,7 @@ abstract class AbstractRequest implements RequestInterface
         foreach ($parameters as $key => $value) {
             $methodName = 'set' . ucfirst($key);
 
-            if (! method_exists($this, $methodName)) {
+            if (!method_exists($this, $methodName)) {
                 continue;
             }
 
@@ -289,7 +289,7 @@ abstract class AbstractRequest implements RequestInterface
      */
     public function compileHttpRequest()
     {
-        if (! $this->validate()) {
+        if (!$this->validate()) {
             throw new InvalidRequestException('One or more required parameters are not set.');
         }
 
