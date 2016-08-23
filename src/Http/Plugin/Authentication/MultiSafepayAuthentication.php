@@ -1,4 +1,4 @@
-<?php namespace Ntholenaar\MultiSafepayClient\Http\Authentication;
+<?php namespace Ntholenaar\MultiSafepayClient\Http\Plugin\Authentication;
 
 use Http\Message\Authentication;
 use Psr\Http\Message\RequestInterface;
