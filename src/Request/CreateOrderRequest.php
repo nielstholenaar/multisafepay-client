@@ -17,9 +17,9 @@ class CreateOrderRequest extends AbstractRequest implements RequestInterface
      */
     public function validate()
     {
-        if (! isset($this->getPaymentOptions()['cancel_url']) ||
-            ! isset($this->getPaymentOptions()['notification_url']) ||
-            ! isset($this->getPaymentOptions()['redirect_url']) ||
+        if (!isset($this->getPaymentOptions()['cancel_url']) ||
+            !isset($this->getPaymentOptions()['notification_url']) ||
+            !isset($this->getPaymentOptions()['redirect_url']) ||
             is_null($this->getAmount()) ||
             is_null($this->getCurrency()) ||
             is_null($this->getDescription()) ||
