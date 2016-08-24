@@ -23,7 +23,7 @@ $ composer require ntholenaar/multisafepay-client
 
 ## Usage
 
-Client setup.
+### Client setup.
 
 ```php
     $client = new Client();
@@ -33,7 +33,7 @@ Client setup.
     $client->setTestMode(true);
 ```
 
-Get all gateways.
+### Get all gateways.
 
 ```php
     $request = $client->createRequest('gateways')->all();
@@ -43,7 +43,7 @@ Get all gateways.
     var_dump($response);
 ```
 
-Get issuers for an particular gateway.
+### Get issuers for an particular gateway.
 
 ```php
     $request = $client->createRequest('issuers')->all('IDEAL');
@@ -53,7 +53,7 @@ Get issuers for an particular gateway.
     var_dump($response);
 ```
 
-Get details about an particular order.
+### Get details about an particular order.
 
 ```php
     $request = $client->createRequest('orders')->show('ORDER-ID');
