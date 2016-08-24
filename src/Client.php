@@ -10,6 +10,7 @@ use Ntholenaar\MultiSafepayClient\Http\Plugin\Authentication;
 use Ntholenaar\MultiSafepayClient\Http\Plugin\PrependPathPlugin;
 use Ntholenaar\MultiSafepayClient\Request\GatewayRequest;
 use Ntholenaar\MultiSafepayClient\Request\IssuerRequest;
+use Ntholenaar\MultiSafepayClient\Request\OrderRequest;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -71,9 +72,7 @@ class Client implements ClientInterface
     }
 
     /**
-     * Get the API endpoint.
-     *
-     * @return \Psr\Http\Message\UriInterface
+     * {@inheritdoc}
      */
     public function getApiEndpoint()
     {
@@ -85,9 +84,7 @@ class Client implements ClientInterface
     }
 
     /**
-     * Get the API path.
-     *
-     * @return \Psr\Http\Message\UriInterface
+     * {@inheritdoc}
      */
     public function getApiPath()
     {
@@ -141,9 +138,7 @@ class Client implements ClientInterface
     }
 
     /**
-     * Get the locale.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getLocale()
     {
@@ -151,10 +146,7 @@ class Client implements ClientInterface
     }
 
     /**
-     * Set the locale.
-     *
-     * @param $locale
-     * @return $this
+     * {@inheritdoc}
      */
     public function setLocale($locale)
     {
@@ -164,10 +156,7 @@ class Client implements ClientInterface
     }
 
     /**
-     * Enable or disable the test environment.
-     *
-     * @param $testMode
-     * @return $this
+     * {@inheritdoc}
      */
     public function setTestMode($testMode)
     {
@@ -177,9 +166,7 @@ class Client implements ClientInterface
     }
 
     /**
-     * Is the test environment active.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function isTestModeEnabled()
     {
@@ -187,10 +174,7 @@ class Client implements ClientInterface
     }
 
     /**
-     * Set the API key.
-     *
-     * @param $apiKey
-     * @return $this
+     * {@inheritdoc}
      */
     public function setApiKey($apiKey)
     {
@@ -204,10 +188,7 @@ class Client implements ClientInterface
     }
 
     /**
-     * Add an Http plugin.
-     *
-     * @param Plugin $plugin
-     * @return $this
+     * {@inheritdoc}
      */
     public function addHttpPlugin(Plugin $plugin)
     {
@@ -258,10 +239,7 @@ class Client implements ClientInterface
     }
 
     /**
-     * Execute the Http Request.
-     *
-     * @param RequestInterface $request
-     * @return array|object
+     * {@inheritdoc}
      */
     public function executeRequest(RequestInterface $request)
     {
@@ -304,9 +282,7 @@ class Client implements ClientInterface
     }
 
     /**
-     * Create an GatewayRequest.
-     *
-     * @return GatewayRequest
+     * {@inheritdoc}
      */
     public function createGatewayRequest()
     {
@@ -314,9 +290,7 @@ class Client implements ClientInterface
     }
 
     /**
-     * Create an IssuerRequest.
-     *
-     * @return IssuerRequest
+     * {@inheritdoc}
      */
     public function createIssuerRequest()
     {
@@ -324,10 +298,15 @@ class Client implements ClientInterface
     }
 
     /**
-     * Create an new request.
-     *
-     * @param $resource
-     * @return \Ntholenaar\MultiSafepayClient\Request\RequestInterface
+     * {@inheritdoc}
+     */
+    public function createOrderRequest()
+    {
+        return new OrderRequest;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function createRequest($resource)
     {
@@ -337,6 +316,9 @@ class Client implements ClientInterface
 
             case 'issuers':
                 return $this->createIssuerRequest();
+
+            case 'orders':
+                return $this->createOrderRequest();
         }
 
         throw new \InvalidArgumentException('Invalid command specified.');

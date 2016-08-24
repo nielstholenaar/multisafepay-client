@@ -40,7 +40,6 @@ class Request implements RequestInterface
         $this->setUriFactory($uriFactory);
 
         $this->setMessageFactory($messageFactory);
-
     }
 
     /**
@@ -113,6 +112,8 @@ class Request implements RequestInterface
     }
 
     /**
+     * Create GET request.
+     *
      *
      * @param UriInterface $uri
      * @param array $query
@@ -123,5 +124,22 @@ class Request implements RequestInterface
         $uri = $uri->withQuery(http_build_query($query));
 
         return $this->messageFactory->createRequest('GET', $uri);
+    }
+
+    /**
+     * Create POST request.
+     *
+     * @param UriInterface $uri
+     * @param array $query
+     * @param array $body
+     * @return \Psr\Http\Message\RequestInterface
+     */
+    protected function post(UriInterface $uri, array $query = array(), array $body = array())
+    {
+        $uri = $uri->withQuery(http_build_query($query));
+
+        $body = json_encode($body);
+
+        return $this->messageFactory->createRequest('POST', $uri, array(), $body);
     }
 }
