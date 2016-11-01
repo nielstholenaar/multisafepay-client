@@ -36,9 +36,9 @@ class Orders extends AbstractApi
     {
         $params['type'] = 'direct';
 
-        if (! array_key_exists('gateway', $params) ||
-            ! array_key_exists('gateway_info', $params) ||
-            ! array_key_exists('issuer_id', $params)
+        if (!array_key_exists('gateway', $params) ||
+            !array_key_exists('gateway_info', $params) ||
+            !array_key_exists('issuer_id', $params)
         ) {
             throw new \InvalidArgumentException('Invalid data provided.');
         }
@@ -54,12 +54,12 @@ class Orders extends AbstractApi
      */
     public function create(array $params)
     {
-        if (! array_key_exists('amount', $params) ||
-            ! array_key_exists('currency', $params) ||
-            ! array_key_exists('description', $params) ||
-            ! array_key_exists('order_id', $params) ||
-            ! array_key_exists('payment_options', $params) ||
-            ! array_key_exists('type', $params)
+        if (!array_key_exists('amount', $params) ||
+            !array_key_exists('currency', $params) ||
+            !array_key_exists('description', $params) ||
+            !array_key_exists('order_id', $params) ||
+            !array_key_exists('payment_options', $params) ||
+            !array_key_exists('type', $params)
         ) {
             throw new \InvalidArgumentException('Invalid data provided.');
         }
