@@ -1,9 +1,8 @@
-<?php namespace Ntholenaar\MultiSafepayClient\Http\Plugin\Authentication;
+<?php namespace Ntholenaar\MultiSafepayClient\Http\Plugin;
 
-use Http\Message\Authentication;
 use Psr\Http\Message\RequestInterface;
 
-final class MultiSafepayAuthentication implements Authentication
+final class Authentication implements \Http\Message\Authentication
 {
     /**
      * @var string

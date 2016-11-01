@@ -1,176 +1,64 @@
 <?php namespace Ntholenaar\MultiSafepayClient;
 
+use Http\Client\Common\HttpMethodsClient;
 use Http\Client\Common\Plugin;
 use Http\Client\Common\PluginClient;
 use Http\Client\HttpClient;
-use Http\Discovery;
+use Http\Discovery\HttpClientDiscovery;
+use Http\Discovery\MessageFactoryDiscovery;
+use Http\Discovery\UriFactoryDiscovery;
+use Http\Message\MessageFactory;
 use Http\Message\UriFactory;
-use Ntholenaar\MultiSafepayClient\Exception\InvalidRequestException;
 use Ntholenaar\MultiSafepayClient\Http\Plugin\Authentication;
 use Ntholenaar\MultiSafepayClient\Http\Plugin\PrependPathPlugin;
-use Ntholenaar\MultiSafepayClient\Request\GatewayRequest;
-use Ntholenaar\MultiSafepayClient\Request\IssuerRequest;
-use Ntholenaar\MultiSafepayClient\Request\OrderRequest;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 
 class Client implements ClientInterface
 {
     /**
-     * Optional ISO 639-1 language code.
-     *
-     * The localization parameter determines the language which is used to
-     * display gateway information and other messages in the responses.
-     * The default language is English.
-     *
-     * @var string
+     * @var HttpMethodsClient
      */
-    protected $locale;
+    private $methodsClient;
 
     /**
-     * @var bool
+     * @var MessageFactory
      */
-    protected $testMode = false;
+    private $messageFactory;
+
+    /**
+     * @var string
+     */
+    private $environment = 'production';
 
     /**
      * @var HttpClient
      */
-    protected $httpClient;
-
-    /**
-     * @var PluginClient
-     */
-    protected $pluginClient;
+    private $httpClient;
 
     /**
      * @var UriFactory
      */
-    protected $uriFactory;
+    private $uriFactory;
 
     /**
      * @var array
      */
-    protected $plugins = array();
+    private $plugins = array();
 
     /**
-     * @param HttpClient $httpClient
+     * @param HttpClient|null $httpClient
+     * @param MessageFactory|null $messageFactory
      * @param UriFactory|null $uriFactory
      */
-    public function __construct(HttpClient $httpClient = null, UriFactory $uriFactory = null)
-    {
-        if (is_null($httpClient)) {
-            $httpClient = Discovery\HttpClientDiscovery::find();
-        }
+    public function __construct(
+        HttpClient $httpClient = null,
+        MessageFactory $messageFactory = null,
+        UriFactory $uriFactory = null
+    ) {
+        $this->httpClient = $httpClient ?: HttpClientDiscovery::find();
 
-        if (is_null($uriFactory)) {
-            $uriFactory = Discovery\UriFactoryDiscovery::find();
-        }
+        $this->messageFactory = $messageFactory ?: MessageFactoryDiscovery::find();
 
-        $this->setHttpClient($httpClient);
-
-        $this->setUriFactory($uriFactory);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getApiEndpoint()
-    {
-        if ($this->isTestModeEnabled()) {
-            return $this->uriFactory->createUri('https://testapi.multisafepay.com');
-        }
-
-        return $this->uriFactory->createUri('https://api.multisafepay.com');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getApiPath()
-    {
-        return $this->uriFactory->createUri('/v1/json/');
-    }
-
-    /**
-     * Get the UriFactory.
-     *
-     * @return UriFactory
-     */
-    protected function getUriFactory()
-    {
-        return $this->uriFactory;
-    }
-
-    /**
-     * Set the UriFactory.
-     *
-     * @param UriFactory $uriFactory
-     * @return $this
-     */
-    protected function setUriFactory(UriFactory $uriFactory)
-    {
-        $this->uriFactory = $uriFactory;
-
-        return $this;
-    }
-
-    /**
-     * Get the HttpClient.
-     *
-     * @return HttpClient
-     */
-    protected function getHttpClient()
-    {
-        return $this->httpClient;
-    }
-
-    /**
-     * Set the HttpClient.
-     *
-     * @param HttpClient $httpClient
-     * @return $this
-     */
-    protected function setHttpClient(HttpClient $httpClient)
-    {
-        $this->httpClient = $httpClient;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getLocale()
-    {
-        return $this->locale;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setLocale($locale)
-    {
-        $this->locale = $locale;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setTestMode($testMode)
-    {
-        $this->testMode = $testMode;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isTestModeEnabled()
-    {
-        return $this->testMode;
+        $this->uriFactory = $uriFactory ?: UriFactoryDiscovery::find();
     }
 
     /**
@@ -178,9 +66,9 @@ class Client implements ClientInterface
      */
     public function setApiKey($apiKey)
     {
-        $this->addHttpPlugin(
+        $this->addPlugin(
             new Plugin\AuthenticationPlugin(
-                new Authentication\MultiSafepayAuthentication($apiKey)
+                new Authentication($apiKey)
             )
         );
 
@@ -188,139 +76,98 @@ class Client implements ClientInterface
     }
 
     /**
+     * Get the API endpoint.
+     *
+     * @return string
+     */
+    protected function getApiEndpoint()
+    {
+        if ($this->environment === 'test') {
+            return 'https://testapi.multisafepay.com';
+        }
+
+        return 'https://api.multisafepay.com';
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public function addHttpPlugin(Plugin $plugin)
+    public function environment($environment)
+    {
+        if ($environment !== 'production' && $environment !== 'test') {
+            throw new \InvalidArgumentException('Invalid environment specified.');
+        }
+
+        $this->environment = $environment;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function api($name)
+    {
+        switch ($name) {
+            case 'orders':
+                return new Api\Orders($this);
+
+            case 'gateways':
+                return new Api\Gateways($this);
+
+            case 'issuers':
+                return new Api\Issuers($this);
+        }
+
+        throw new \InvalidArgumentException('Invalid api specified.');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addPlugin(Plugin $plugin)
     {
         $this->plugins[] = $plugin;
 
-        $this->invalidatePluginClient();
+        $this->invalidHttpClient();
 
         return $this;
     }
 
     /**
-     * Invalidate the PluginClient instance.
+     * {@inheritdoc}
+     */
+    public function getHttpClient()
+    {
+        if ($this->methodsClient !== null) {
+            return $this->methodsClient;
+        }
+
+        $plugins = array_merge(
+            $this->plugins,
+            array(
+                new Plugin\ErrorPlugin(),
+                new Plugin\AddHostPlugin($this->uriFactory->createUri($this->getApiEndpoint())),
+                new PrependPathPlugin('/v1/json')
+            )
+        );
+
+        $pluginClient = new PluginClient($this->httpClient, $plugins);
+
+        $this->methodsClient = new HttpMethodsClient($pluginClient, $this->messageFactory);
+
+        return $this->methodsClient;
+    }
+
+    /**
+     * Invalidate the http client.
      *
      * @return $this
      */
-    protected function invalidatePluginClient()
+    protected function invalidHttpClient()
     {
-        $this->pluginClient = null;
+        $this->methodsClient = null;
 
         return $this;
-    }
-
-    /**
-     * Get the PluginClient.
-     *
-     * @return PluginClient
-     */
-    protected function getPluginClient()
-    {
-        if ($this->pluginClient !== null) {
-            return $this->pluginClient;
-        }
-
-        $plugins = [
-            new Plugin\ErrorPlugin(),
-            new Plugin\AddHostPlugin($this->getApiEndpoint()),
-            new PrependPathPlugin($this->getApiPath())
-        ];
-
-        // @todo set Locale plugin, Which automatically adds the locale query parameter.
-
-        $this->pluginClient = new PluginClient(
-            $this->httpClient,
-            array_merge($plugins, $this->plugins)
-        );
-
-        return $this->pluginClient;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function executeRequest(RequestInterface $request)
-    {
-        $response = $this->getPluginClient()->sendRequest($request);
-
-        return $this->parseResponse($response);
-    }
-
-    /**
-     * Parse the response.
-     *
-     * @param ResponseInterface $response
-     * @return array|object
-     */
-    protected function parseResponse(ResponseInterface $response)
-    {
-        $responseBody = json_decode(
-            $response->getBody()->getContents()
-        );
-
-        $this->validateResponse($responseBody);
-
-        return $responseBody->data;
-    }
-
-    /**
-     * Validate the response.
-     *
-     * @param $response
-     * @return bool
-     * @throws InvalidRequestException
-     */
-    protected function validateResponse($response)
-    {
-        if (!property_exists($response, 'success') || $response->success !== true) {
-            throw new InvalidRequestException($response->error_info, $response->error_code);
-        }
-
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createGatewayRequest()
-    {
-        return new GatewayRequest;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createIssuerRequest()
-    {
-        return new IssuerRequest;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createOrderRequest()
-    {
-        return new OrderRequest;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createRequest($resource)
-    {
-        switch ($resource) {
-            case 'gateways':
-                return $this->createGatewayRequest();
-
-            case 'issuers':
-                return $this->createIssuerRequest();
-
-            case 'orders':
-                return $this->createOrderRequest();
-        }
-
-        throw new \InvalidArgumentException('Invalid command specified.');
     }
 }

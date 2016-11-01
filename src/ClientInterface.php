@@ -1,57 +1,11 @@
 <?php namespace Ntholenaar\MultiSafepayClient;
 
+use Http\Client\Common\HttpMethodsClient;
 use Http\Client\Common\Plugin;
-use Ntholenaar\MultiSafepayClient\Request\GatewayRequest;
-use Ntholenaar\MultiSafepayClient\Request\IssuerRequest;
-use Ntholenaar\MultiSafepayClient\Request\OrderRequest;
-use Psr\Http\Message\RequestInterface;
+use Ntholenaar\MultiSafepayClient\Api\ApiInterface;
 
 interface ClientInterface
 {
-    /**
-     * Get the API endpoint.
-     *
-     * @return \Psr\Http\Message\UriInterface
-     */
-    public function getApiEndpoint();
-
-    /**
-     * Get the API path.
-     *
-     * @return \Psr\Http\Message\UriInterface
-     */
-    public function getApiPath();
-
-    /**
-     * Get the locale.
-     *
-     * @return string
-     */
-    public function getLocale();
-
-    /**
-     * Set the locale.
-     *
-     * @param $locale
-     * @return $this
-     */
-    public function setLocale($locale);
-
-    /**
-     * Enable or disable the test environment.
-     *
-     * @param $testMode
-     * @return $this
-     */
-    public function setTestMode($testMode);
-
-    /**
-     * Is the test environment active.
-     *
-     * @return bool
-     */
-    public function isTestModeEnabled();
-
     /**
      * Set the API key.
      *
@@ -61,47 +15,32 @@ interface ClientInterface
     public function setApiKey($apiKey);
 
     /**
-     * Add an Http plugin.
+     * Set the environment.
      *
-     * @param Plugin $plugin
+     * @param $environment
      * @return $this
      */
-    public function addHttpPlugin(Plugin $plugin);
+    public function environment($environment);
 
     /**
-     * Execute the Http Request.
-     *
-     * @param RequestInterface $request
-     * @return array|object
+     * @param $name
+     * @throws \InvalidArgumentException
+     * @return ApiInterface
      */
-    public function executeRequest(RequestInterface $request);
+    public function api($name);
 
     /**
-     * Create an GatewayRequest.
+     * Add a new Http plugin.
      *
-     * @return GatewayRequest
+     * @param Plugin $plugin
+     * @return Client
      */
-    public function createGatewayRequest();
+    public function addPlugin(Plugin $plugin);
 
     /**
-     * Create an IssuerRequest.
+     * Get the http client.
      *
-     * @return IssuerRequest
+     * @return HttpMethodsClient
      */
-    public function createIssuerRequest();
-
-    /**
-     * Create an OrderRequest.
-     *
-     * @return OrderRequest
-     */
-    public function createOrderRequest();
-
-    /**
-     * Create an new request.
-     *
-     * @param $resource
-     * @return \Ntholenaar\MultiSafepayClient\Request\RequestInterface
-     */
-    public function createRequest($resource);
+    public function getHttpClient();
 }

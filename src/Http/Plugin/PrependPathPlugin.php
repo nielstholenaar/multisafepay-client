@@ -2,19 +2,18 @@
 
 use Http\Client\Common\Plugin;
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\UriInterface;
 
 final class PrependPathPlugin implements Plugin
 {
     /**
-     * @var UriInterface
+     * @var string
      */
     private $path;
 
     /**
-     * @param UriInterface $path
+     * @param $path
      */
-    public function __construct(UriInterface $path)
+    public function __construct($path)
     {
         $this->path = $path;
     }
@@ -24,10 +23,10 @@ final class PrependPathPlugin implements Plugin
      */
     public function handleRequest(RequestInterface $request, callable $next, callable $first)
     {
-        $uri = $request->getUri();
+        $path = $this->path . $request->getUri()->getPath();
 
         $request = $request->withUri(
-            $uri->withPath($this->path . $uri->getPath())
+            $request->getUri()->withPath($path)
         );
 
         return $next($request);

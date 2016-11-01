@@ -29,16 +29,12 @@ $ composer require ntholenaar/multisafepay-client
     $client = new Client();
 
     $client->setApiKey('API-KEY');
-
-    $client->setTestMode(true);
 ```
 
-### Get all gateways.
+### Get all gateways
 
 ```php
-    $request = $client->createRequest('gateways')->all();
-    
-    $response = $client->executeRequest($request);
+    $response = $client->environment('test')->api('gateways')->all();
     
     var_dump($response);
 ```
@@ -46,20 +42,16 @@ $ composer require ntholenaar/multisafepay-client
 ### Get issuers for an particular gateway.
 
 ```php
-    $request = $client->createRequest('issuers')->all('IDEAL');
-    
-    $response = $client->executeRequest($request);
-    
+    $response = $client->environment('test')->api('issuers')->all('IDEAL');
+        
     var_dump($response);
 ```
 
 ### Get details about an particular order.
 
 ```php
-    $request = $client->createRequest('orders')->show('ORDER-ID');
-    
-    $response = $client->executeRequest($request);
-    
+    $response = $client->environment('test')->api('orders')->show('ORDER-ID');
+        
     var_dump($response);
 ```
 
