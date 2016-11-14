@@ -10,7 +10,7 @@ class Orders extends AbstractApi
      */
     public function show($identifier)
     {
-        return $this->get('/orders' . rawurlencode($identifier));
+        return $this->get('/orders/' . rawurlencode($identifier));
     }
 
     /**
