@@ -12,6 +12,7 @@ The following versions of PHP are supported.
 
 * PHP 5.6
 * PHP 7.0
+* HTTPlug compatible HTTP Library. (See: http://docs.php-http.org/en/latest/httplug/users.html)
 
 ## Installation
 
