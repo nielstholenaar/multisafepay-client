@@ -36,10 +36,7 @@ class Orders extends AbstractApi
     {
         $params['type'] = 'direct';
 
-        if (!array_key_exists('gateway', $params) ||
-            !array_key_exists('gateway_info', $params) ||
-            !array_key_exists('issuer_id', $params)
-        ) {
+        if (!array_key_exists('gateway', $params)) {
             throw new \InvalidArgumentException('Invalid data provided.');
         }
 
