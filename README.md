@@ -59,6 +59,7 @@ $ composer require ntholenaar/multisafepay-client
 ## Credits
 
 - [Niels Tholenaar](https://github.com/nielstholenaar)
+- [PCextreme](https://github.com/pcextreme)
 
 
 ## License
